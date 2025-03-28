@@ -1,4 +1,4 @@
-var sql = require('msnodesql');
+var sql = require('msnodesqlv8'); // Updated to use msnodesqlv8
 
 // Function to validate if a table exists and has Change Data Capture (CDC) enabled
 module.exports = function validateTable(conn_str, tblname) {
@@ -18,19 +18,19 @@ module.exports = function validateTable(conn_str, tblname) {
     }
 
     console.log('Executing query to validate table:', validateTableQuery);
-    conn.queryRaw(validateTableQuery, function (err, results) {
+    conn.query(validateTableQuery, function (err, results) { // Updated queryRaw to query
       if (err) {
         console.error('Error executing query:', err);
         throw new Error(err);
       }
 
       console.log('Query results:', results);
-      if (results.rows.length === 0) {
+      if (results.length === 0) { // Adjusted for msnodesqlv8 result format
         console.error(`Table "${tblname}" does not exist.`);
         throw new Error(`Table "${tblname}" does not exist.`);
       }
 
-      if (results.rows[0][2] !== 1) {
+      if (results[0].is_tracked_by_cdc !== 1) { // Adjusted for msnodesqlv8 result format
         console.error(`Change Data Capture for "${tblname}" is not enabled.`);
         throw new Error(`Change Data Capture for "${tblname}" is not enabled.`);
       }

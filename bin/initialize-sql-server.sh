@@ -1,14 +1,19 @@
 #!/bin/bash
 
 # Pull and run SQL Server Docker container
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=1234" -p 1434:1433 --name sqlserver -d mcr.microsoft.com/mssql/server:2019-latest
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=StrongP@ssw0rd" -p 1434:1433 --name sqlserver -d mcr.microsoft.com/mssql/server:2019-latest
+
+# Enable TCP/IP connections
+docker exec -u root -it sqlserver bash -c "/opt/mssql/bin/mssql-conf set network.tcpenabled 1"
+docker exec -u root -it sqlserver bash -c "systemctl restart mssql-server"
 
 # Wait for SQL Server to start
 echo "Waiting for SQL Server to start..."
-sleep 15
+sleep 10
+
 
 # Initialize the database and table
-docker exec -i sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost,1434 -U sa -P 1234 <<EOF
+docker exec -i sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost,1434 -U sa -P StrongP@ssw0rd <<EOF
 -- Create database People
 CREATE DATABASE People;
 GO
@@ -46,8 +51,7 @@ EXEC sys.sp_cdc_enable_table
 GO
 EOF
 
-# Define the connection string
-CONNECTION_STRING="Server=localhost,1434;Database=People;User Id=sa;Password=1234;"
+# Define the connection string for msnodesqlv8
+CONNECTION_STRING="Driver={SQL Server Native Client 11.0};Server=(local);Database=DB_NAME;Trusted_Connection={Yes};"
 
 echo "SQL Server initialized with database 'People' and table 'person'. CDC enabled."
-echo "Connection string: $CONNECTION_STRING"

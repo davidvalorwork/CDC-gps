@@ -9,7 +9,7 @@ LASTNAME="Lastname$((TIMESTAMP % 10000))"
 DOCUMENT="$((TIMESTAMP % 10000))$((TIMESTAMP % 10000))"
 
 # Insert the new person into the person table
-docker exec -i sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost,1434 -U sa -P 1234 <<EOF
+docker exec -i sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost,1434 -U sa -P StrongP@ssw0rd <<EOF
 USE People;
 GO
 INSERT INTO person (name, lastname, document) VALUES ('$NAME', '$LASTNAME', '$DOCUMENT');
