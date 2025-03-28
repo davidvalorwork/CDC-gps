@@ -27,19 +27,20 @@ The project uses the following dependencies:
 
 ## Configuration
 
-Update the `connectToSQLServer` function in `index.js` with your SQL Server credentials:
-```javascript
-const config = {
-  user: 'your_username',
-  password: 'your_password',
-  server: 'your_server',
-  database: 'your_database',
-  options: {
-    encrypt: false,
-    trustServerCertificate: true
-  }
-};
+Create a `.env` file in the root directory and add your SQL Server credentials and other configuration values:
+```env
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_SERVER=your_server
+DB_DATABASE=your_database
+CAPTURE_INSTANCE_NAME=NombreDeTuTabla_capture
+CONNECTION_STRING=your_connection_string
+SCHEMA=your_schema
+TABLE_NAME=your_table_name
+INTERVAL_MS=5000
 ```
+
+The application will automatically load these values from the `.env` file.
 
 ## Usage
 
@@ -47,6 +48,33 @@ Run the application:
 ```bash
 node index.js
 ```
+
+## Database Initialization
+
+To initialize the SQL Server database, run the provided script:
+
+```bash
+bash ./bin/initialize-sql-server.sh
+```
+
+This script will:
+1. Start a SQL Server instance using Docker with the username `sa` and password `1234`.
+2. Create a database named `People`.
+3. Create a table `person` with columns `name`, `lastname`, and `document`.
+4. Insert 3 random persons into the `person` table.
+5. Enable Change Data Capture (CDC) for the `People` database and the `person` table.
+
+## Insert a New Person
+
+To insert a new person with distinct values into the `person` table, run the standalone script:
+
+```bash
+bash ./bin/insert-person.sh
+```
+
+This script will:
+1. Generate random values for `name`, `lastname`, and `document`.
+2. Insert the new person into the `person` table in the `People` database.
 
 ## Activación de CDC en SQL Server para una Tabla Específica y Configuración de Rol para Consultar Solo Inserts
 

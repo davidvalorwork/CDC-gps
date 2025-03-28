@@ -1,12 +1,32 @@
+require('dotenv').config();
 const sql = require('mssql');
+const Stream = require('stream').Stream;
+const realTimeStream = require('./realTimeStream'); // Assuming the library is saved as realTimeStream.js
 
 async function main() {
   try {
     const pool = await connectToSQLServer();
-    const captureInstanceName = 'NombreDeTuTabla_capture'; // Reemplaza con tu nombre de instancia
+    const captureInstanceName = process.env.CAPTURE_INSTANCE_NAME; // Use environment variable
 
     if (pool) {
       await getCDCEntries(pool, captureInstanceName);
+
+      // Configure and start the real-time stream
+      const connStr = process.env.CONNECTION_STRING; // Use environment variable
+      const schema = process.env.SCHEMA; // Use environment variable
+      const tableName = process.env.TABLE_NAME; // Use environment variable
+      const interval = parseInt(process.env.INTERVAL_MS, 10); // Use environment variable
+
+      const stream = realTimeStream(connStr, schema, tableName, interval);
+      stream.on('data', (data) => {
+        console.log('Real-time data:', data);
+      });
+
+      stream.on('error', (err) => {
+        console.error('Stream error:', err);
+      });
+
+      // Close the SQL connection when done
       await sql.close();
     }
   } catch (error) {
@@ -16,10 +36,10 @@ async function main() {
 
 async function connectToSQLServer() {
   const config = {
-    user: 'your_username',
-    password: 'your_password',
-    server: 'your_server',
-    database: 'your_database',
+    user: process.env.DB_USER, // Use environment variable
+    password: process.env.DB_PASSWORD, // Use environment variable
+    server: process.env.DB_SERVER, // Use environment variable
+    database: process.env.DB_DATABASE, // Use environment variable
     options: {
       encrypt: false,
       trustServerCertificate: true
